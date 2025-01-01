@@ -4,7 +4,13 @@ const express = require('express');
 const cors = require('cors')
 require('./controllers/notificacionesCron');
 const app = express();
-app.use(cors())
+
+
+app.use(cors({
+  origin: ["https://salon-project-c036b.web.app/"],
+  /*methods: 'get,POSTPUT,DELETE',*/
+  credentials: true,
+}));
 
 app.use(express.json())
 

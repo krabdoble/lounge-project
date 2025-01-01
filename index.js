@@ -7,7 +7,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: ["https://salon-project-c036b.web.app/"],
+  origin: ["https://salon-project-c036b.web.app"],
   /*methods: 'get,POSTPUT,DELETE',*/
   credentials: true,
 }));

@@ -34,7 +34,7 @@ const validarFirebase = async (req, res, next) => {
       return res.status(401).json({ ok: false, error: "Token no enviado" });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken).then((decodedToken) => {
     const uid = decodedToken.uid;
     
     // Asigna la información del usuario a req.user
@@ -45,7 +45,8 @@ const validarFirebase = async (req, res, next) => {
       photoURL: decodedToken.picture,
     };
 
-    next(); // Continúa al siguiente middleware o controlador
+    next(); 
+  })// Continúa al siguiente middleware o controlador
   } catch (error) {
     console.error("Error al validar el token de Firebase:", error);
     return res.status(401).json({ ok: false, error: "Token inválido" });

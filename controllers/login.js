@@ -3,7 +3,7 @@ const Usuarios = require("../models/usuarioModel");
 
 
 
-/*const createUsuario = async (req, res) => {
+const createUsuario = async (req, res) => {
   const { displayName, email, photoURL, firebaseToken } = req.body;
 
   // Validación de entrada
@@ -53,7 +53,7 @@ const Usuarios = require("../models/usuarioModel");
     // Respuesta genérica para otros errores
     return res.status(500).json({ ok: false, message: "Error al registrar usuario." });
   }
-};*/
+};
 
 
 /*const createUsuario = async (req, res) => {
@@ -85,7 +85,7 @@ const Usuarios = require("../models/usuarioModel");
 };*/
 
 
-const createUsuario = async (req, res) => {
+/*const createUsuario = async (req, res) => {
   const { displayName, email, photoURL, firebaseToken } = req.body;
 
   try {
@@ -94,7 +94,7 @@ const createUsuario = async (req, res) => {
       .verifyIdToken(firebaseToken)
       .then((decodedToken) => {
         const uid = decodedToken.uid;
-      // return res.json({ ok: true });
+       return res.json({ ok: true });
       });
     let usuario = await Usuarios.findOne({ where: { email } });
     if (!usuario) {
@@ -111,7 +111,7 @@ const createUsuario = async (req, res) => {
     console.error("Error al registrar cliente:", error);
    return res.status(500).json({ message: "Error al registrar cliente" });
   }
-};
+};*/
 
 const getAllUsuarios = async (req, res = response) => {
     try {

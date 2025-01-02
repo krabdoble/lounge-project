@@ -34,7 +34,7 @@ app.use('/api/reservaspasadas', reservaspasadasroutes)
 let admin = require("firebase-admin");
 
 try {
-  const firebaseCredentials = process.env.FIREBASE_CREDENTIALS;
+  const firebaseCredentials = process.env.FIREBASE_CREDENTIALES;
 
   if (!firebaseCredentials) {
     throw new Error("La variable de entorno FIREBASE_CREDENTIALS no está definida.");
@@ -49,7 +49,7 @@ try {
   console.log('Firebase Admin inicializado correctamente.');
 } catch (error) {
   console.error('Error al inicializar Firebase Admin:', error.message);
-  console.log('Contenido de FIREBASE_CREDENTIALS:', process.env.FIREBASE_CREDENTIALS);
+  console.log('Contenido de FIREBASE_CREDENTIALS:', process.env.FIREBASE_CREDENTIALES);
 }
 
 app.listen(PORT,() =>{

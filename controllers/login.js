@@ -12,16 +12,16 @@ const createUsuario = async (req, res) => {
   }
 
   try {
-    await admin
+    /*await admin
       .auth()
       .verifyIdToken(firebaseToken)
       .then((decodedToken) => {
         const uid = decodedToken.uid;
        return res.json({ ok: true });
-      });
+      });*/
     // Verificar el token de Firebase
-    //const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
-   // const uid = decodedToken.uid; // UID único proporcionado por Firebase
+    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const uid = decodedToken.uid; // UID único proporcionado por Firebase
 
     // Buscar el usuario en la base de datos por correo electrónico
     let usuario = await Usuarios.findOne({ where: { email } });

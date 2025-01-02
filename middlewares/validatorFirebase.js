@@ -42,11 +42,12 @@ const validarFirebase = async (req, res, next) => {
       uid,
       email: decodedToken.email, // Otras propiedades del token que necesites
       displayName: decodedToken.name,
+      photoURL: decodedToken.picture,
     };
 
     next(); // Continúa al siguiente middleware o controlador
   } catch (error) {
-    console.log(error);
+    console.error("Error al validar el token de Firebase:", error);
     return res.status(401).json({ ok: false, error: "Token inválido" });
   }
 };

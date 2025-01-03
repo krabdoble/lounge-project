@@ -6,7 +6,11 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  
 });
+console.log("Email User:", process.env.EMAIL_USER);
+console.log("Email Pass:", process.env.EMAIL_PASS);
+
 
 const enviarCorreoConfirmacion = async (email, reserva) => {
   try {
@@ -28,9 +32,10 @@ const enviarCorreoConfirmacion = async (email, reserva) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("Correo enviado con éxito.");
+    console.log("Email sent successfully.");
   } catch (error) {
     console.error("Error al enviar el correo:", error);
+    throw new Error("Failed to send confirmation email.");
   }
 };
 

@@ -67,8 +67,8 @@ const createReserva = async (req, res) => {
       reserva,
     });
   } catch (error) {
-    console.error("Error al crear la reserva 1:", error);
-    res.status(500).json({ error: 'No se pudo crear la reserva. 2' });
+    console.error("Error creating the reservation:", error.message);
+    res.status(500).json({ error: 'The reservation was saved but the email could not be sent' });
   }
 };
 

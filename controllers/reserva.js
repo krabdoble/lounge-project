@@ -15,8 +15,11 @@ const createReserva = async (req, res) => {
   
 
   try {
-    const inicio = new Date(fechaInicio).toISOString(); // Convertir a UTC
-    const fin = new Date(fechaFin).toISOString();
+    /*const inicio = new Date(fechaInicio).toISOString(); // Convertir a UTC
+    const fin = new Date(fechaFin).toISOString();*///CAMBIAR SI NO FUNCCIONA
+
+    const inicio = new Date(fechaInicio); // Convertir a UTC
+    const fin = new Date(fechaFin);
 
     if (inicio >= fin) {
       return res.status(400).json({ error: 'La fecha de inicio debe ser anterior a la fecha de fin.' });

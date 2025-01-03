@@ -13,8 +13,8 @@ const { Op } = require('sequelize');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'process.env.EMAIL_USER', //tu-email@gmail.com, Cambia a tu correo
-    pass: 'process.env.EMAIL_PASS', //tu-contraseña, Cambia a tu contraseña o usa variables de entorno
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
@@ -22,41 +22,44 @@ const transporter = nodemailer.createTransport({
 cron.schedule('0 0 * * *', async () => {
   console.log('Ejecutando tarea cron para enviar notificaciones');
 
-  /*const fechaActual = moment().startOf('day');
-  const fechaNotificacion = fechaActual.add(1, 'day').toISOString();*/
-  const fechaNotificacion = moment().add(1, 'day').startOf('day').toISOString();
+  const fechaNotificacionInicio = moment().add(1, 'day').startOf('day').toDate();
+  const fechaNotificacionFin = moment().add(1, 'day').endOf('day').toDate();
+
 
   try {
     // Buscar reservas programadas para mañana
     const reservas = await Reserva.findAll({
       where: {
         fechaInicio: {
-         /* $gte: fechaNotificacion,
-          $lt: moment(fechaNotificacion).add(1, 'day').toISOString(),*/
-          [Op.gte]: fechaNotificacion.toDate(),
-          [Op.lt]: fechaNotificacion.clone().add(1, 'day').toDate(),
+          [Op.gte]: fechaNotificacionInicio,
+          [Op.lt]: fechaNotificacionFin,
         },
       },
-      include: [Usuario, Salon],
-      /*include: [
+      include: [
         { model: Usuario, attributes: ["nombre", "email"] },
         { model: Salon, attributes: ["nombre"] },
-      ],*/
+      ],
     });
 
     // Enviar notificaciones por correo
     for (const reserva of reservas) {
       const { Usuario: usuario, Salon: salon, fechaInicio } = reserva;
+
+      if (!usuario || !usuario.email) {
+        console.error(`Usuario asociado a la reserva con ID ${reserva.id} no tiene un email.`);
+        continue;
+      }
+
       await transporter.sendMail({
-        from: 'process.env.EMAIL_USER',
+        from: process.env.EMAIL_USER,
         to: usuario.email,
-        subject: 'Recordatorio de tu reserva',
-        text: `Hola ${usuario.nombre}, recuerda que tienes una reserva en el salón ${salon.nombre} el ${moment(fechaInicio).format('YYYY-MM-DD HH:mm')}. ¡Te esperamos!`,
+        subject: 'Reminder of your reservation',
+        text: `Hello ${usuario.nombre}, remember that you have a reservation in the Lounge ${salon.nombre} on ${moment(fechaInicio).format('YYYY-MM-DD HH:mm')}. We are waiting for you!`,
       });
-      console.log(`Correo enviado a ${usuario.email}`);
+      console.log(`email sent to ${usuario.email}`);
     }
   } catch (error) {
-    console.error('Error al enviar notificaciones:', error);
+    console.error('Error sending notifications:', error);
   }
 });
 

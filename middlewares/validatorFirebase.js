@@ -74,8 +74,8 @@ const validarFirebase = async (req, res, next) => {
     req.user = {
       uid: decodedToken.uid,
       email: decodedToken.email,
-      name: decodedToken.name || "",
-      picture: decodedToken.picture || "",
+      displayName: decodedToken.name || "",
+      photoUrl: decodedToken.picture || "",
     };
 
     next(); // Continuar con el siguiente middleware/controlador

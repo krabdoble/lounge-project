@@ -2,8 +2,9 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors')
-require('./controllers/notificacionesCron');
 const app = express();
+require('./controllers/notificacionesCron');
+
 
 
 app.use(cors({

@@ -20,7 +20,7 @@ const createUsuario = async (req, res) => {
        return res.json({ ok: true });
       });*/
     // Verificar el token de Firebase
-    await admin.auth().verifyIdToken(firebaseToken).then((decodedToken) => {
+    const decodedIoken= await admin.auth().verifyIdToken(firebaseToken).then((decodedToken) => {
     const uid = decodedToken.uid;
   }); // UID único proporcionado por Firebase
 

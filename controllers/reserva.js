@@ -1,4 +1,80 @@
+const moment = require('moment');
 const Reserva = require('../models/reservaModel');
+const Usuario = require('../models/usuarioModel');
+const Salon = require('../models/salonModel');
+const { Op } = require('sequelize');
+const enviarCorreoConfirmacion = require("./coreoConfirmacion"); // Importa la función
+const dotenv = require('dotenv');
+dotenv.config();
+
+const createReserva = async (req, res) => {
+  const { usuarioId, salonId, fechaInicio, fechaFin } = req.body;
+  const user = req.user; // Información del usuario autenticado
+
+  try {
+    // Asegúrate de que las fechas no se conviertan automáticamente a UTC
+    const inicio = moment(fechaInicio, 'YYYY-MM-DD HH:mm').toDate(); 
+    const fin = moment(fechaFin, 'YYYY-MM-DD HH:mm').toDate();
+
+    if (inicio >= fin) {
+      return res.status(400).json({ error: 'The start date must be before the end date.' });
+    }
+
+    // Verificar conflictos de horario
+    const conflicto = await Reserva.findOne({
+      where: {
+        salonId,
+        [Op.or]: [
+          { fechaInicio: { [Op.between]: [inicio, fin] } },
+          { fechaFin: { [Op.between]: [inicio, fin] } },
+          {
+            [Op.and]: [
+              { fechaInicio: { [Op.lte]: inicio } },
+              { fechaFin: { [Op.gte]: fin } },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (conflicto) {
+      return res.status(400).json({ error: 'Schedule conflict with another reservation.' });
+    }
+
+    const salon = await Salon.findByPk(salonId);
+
+    if (!salon) {
+      return res.status(404).json({ error: "The associated Lounge does not exist." });
+    }
+
+    // Crear la reserva en la base de datos con las fechas en formato local
+    const reserva = await Reserva.create({ usuarioId, salonId, fechaInicio: inicio, fechaFin: fin });
+
+    // Formatear las fechas para el correo y enviar
+    const fechaInicioFormatted = moment(inicio).format('YYYY-MM-DD HH:mm');
+    const fechaFinFormatted = moment(fin).format('YYYY-MM-DD HH:mm');
+
+    await enviarCorreoConfirmacion(user.email, {
+      ...reserva.dataValues, // Incluye los datos de la reserva
+      fechaInicio: fechaInicioFormatted, // Pasar las fechas formateadas
+      fechaFin: fechaFinFormatted,
+      salonNombre: salon.nombre, // Agrega el nombre del salón
+      usuarioNombre: user.displayName.split(" ")[0], // Agrega el nombre del usuario
+    });
+
+    res.status(201).json({
+      ok: true,
+      mensaje: "Reservation successfully created.",
+      reserva,
+    });
+  } catch (error) {
+    console.error("Error creating the reservation:", error.message);
+    res.status(500).json({ error: 'The reservation was saved but the email could not be sent' });
+  }
+};
+
+
+/*const Reserva = require('../models/reservaModel');
 const Usuario = require('../models/usuarioModel');
 const Salon = require('../models/salonModel');
 const { Op } = require('sequelize');
@@ -71,7 +147,7 @@ const createReserva = async (req, res) => {
     console.error("Error creating the reservation:", error.message);
     res.status(500).json({ error: 'The reservation was saved but the email could not be sent.' });
   }
-};
+};*/
 
 
 /*// Crear reserva y enviar correo

@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-const moment = require('moment');
+
 
 const transporter = nodemailer.createTransport({
   service: "Gmail", // O usa el servicio SMTP correspondiente
@@ -14,8 +14,6 @@ const transporter = nodemailer.createTransport({
 
 const enviarCorreoConfirmacion = async (email, reserva) => {
   try {
-    const fechaInicioFormatted = moment(reserva.fechaInicio).format('YYYY-MM-DD HH:mm');
-    const fechaFinFormatted = moment(reserva.fechaFin).format('YYYY-MM-DD HH:mm');
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -26,8 +24,8 @@ const enviarCorreoConfirmacion = async (email, reserva) => {
         <p>Your reservation has been successfully created with the following details:</p>
         <ul>
           <li><strong>Lounge:</strong> ${reserva.salonNombre}</li>
-          <li><strong>Start Date:</strong> ${fechaInicioFormatted }</li>
-          <li><strong>End Date:</strong> ${fechaFinFormatted}</li>
+          <li><strong>Start Date:</strong> ${reserva.fechaInicio}</li>
+          <li><strong>End Date:</strong> ${reserva.fechaFin}</li>
         </ul>
         <p>¡Thank you for booking with us!</p>
       `,

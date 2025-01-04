@@ -3,6 +3,7 @@ const Usuario = require('../models/usuarioModel');
 const Salon = require('../models/salonModel');
 const { Op } = require('sequelize');
 const enviarCorreoConfirmacion = require("./coreoConfirmacion"); // Importa la función
+const moment = require('moment');
 const dotenv = require('dotenv');
 dotenv.config();
 

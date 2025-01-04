@@ -1,4 +1,5 @@
 const moment = require('moment');
+const moment = require('moment-timezone');
 const Reserva = require('../models/reservaModel');
 const Usuario = require('../models/usuarioModel');
 const Salon = require('../models/salonModel');
@@ -13,8 +14,11 @@ const createReserva = async (req, res) => {
 
   try {
     // Asegúrate de que las fechas no se conviertan automáticamente a UTC
-    const inicio = moment(fechaInicio, 'YYYY-MM-DD HH:mm').toDate(); 
-    const fin = moment(fechaFin, 'YYYY-MM-DD HH:mm').toDate();
+    /*const inicio = moment(fechaInicio, 'YYYY-MM-DD HH:mm').toDate(); 
+    const fin = moment(fechaFin, 'YYYY-MM-DD HH:mm').toDate();*/
+    // Asegúrate de especificar la zona horaria correcta al procesar las fechas
+    const inicio = moment.tz(fechaInicio, "America/New_York").toDate(); // Reemplaza con tu zona horaria local
+    const fin = moment.tz(fechaFin, "America/New_York").toDate();
 
     if (inicio >= fin) {
       return res.status(400).json({ error: 'The start date must be before the end date.' });

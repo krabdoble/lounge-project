@@ -6,7 +6,74 @@ const enviarCorreoConfirmacion = require("./coreoConfirmacion"); // Importa la f
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Crear reserva y enviar correo
+
+const createReserva = async (req, res) => {
+  const { usuarioId, salonId, fechaInicio, fechaFin } = req.body;
+  const user = req.user;
+
+  try {
+    // Convertir las fechas a UTC usando moment
+    const inicio = moment(fechaInicio).utc().toISOString();
+    const fin = moment(fechaFin).utc().toISOString();
+
+    if (moment(inicio).isSameOrAfter(fin)) {
+      return res.status(400).json({ error: 'The start date must be before the end date.' });
+    }
+
+    // Verificar conflictos de horario
+    const conflicto = await Reserva.findOne({
+      where: {
+        salonId,
+        [Op.or]: [
+          { fechaInicio: { [Op.between]: [inicio, fin] } },
+          { fechaFin: { [Op.between]: [inicio, fin] } },
+          {
+            [Op.and]: [
+              { fechaInicio: { [Op.lte]: inicio } },
+              { fechaFin: { [Op.gte]: fin } },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (conflicto) {
+      return res.status(400).json({ error: 'Schedule conflict with another reservation.' });
+    }
+
+    const salon = await Salon.findByPk(salonId);
+    if (!salon) {
+      return res.status(404).json({ error: "The associated Lounge does not exist." });
+    }
+
+    // Crear la reserva con fechas UTC
+    const reserva = await Reserva.create({ usuarioId, salonId, fechaInicio: inicio, fechaFin: fin });
+
+    // Formatear fechas en la zona horaria local para el correo
+    const reservaFormatted = {
+      ...reserva.dataValues,
+      fechaInicio: moment.utc(reserva.fechaInicio).local().format('YYYY-MM-DD HH:mm'),
+      fechaFin: moment.utc(reserva.fechaFin).local().format('YYYY-MM-DD HH:mm'),
+      salonNombre: salon.nombre,
+      usuarioNombre: user.displayName.split(" ")[0],
+    };
+
+    // Enviar correo de confirmación
+    await enviarCorreoConfirmacion(user.email, reservaFormatted);
+
+    res.status(201).json({
+      ok: true,
+      mensaje: "Reservation successfully created.",
+      reserva,
+    });
+  } catch (error) {
+    console.error("Error creating the reservation:", error.message);
+    res.status(500).json({ error: 'The reservation was saved but the email could not be sent.' });
+  }
+};
+
+
+/*// Crear reserva y enviar correo
 const createReserva = async (req, res) => {
   const {usuarioId, salonId, fechaInicio, fechaFin } = req.body;
   const user = req.user; // Información del usuario autenticado
@@ -16,7 +83,7 @@ const createReserva = async (req, res) => {
 
   try {
     /*const inicio = new Date(fechaInicio).toISOString(); // Convertir a UTC
-    const fin = new Date(fechaFin).toISOString();*///CAMBIAR SI NO FUNCCIONA
+    const fin = new Date(fechaFin).toISOString();///CAMBIAR SI NO FUNCCIONA
 
     const inicio = new Date(fechaInicio); // Convertir a UTC
     const fin = new Date(fechaFin);
@@ -52,6 +119,8 @@ const createReserva = async (req, res) => {
       return res.status(404).json({ error: "El salón asociado no existe." });
     }
 
+    
+
     // Crear la reserva
     const reserva = await Reserva.create({ usuarioId, salonId, fechaInicio: inicio, fechaFin: fin });
 
@@ -73,7 +142,7 @@ const createReserva = async (req, res) => {
     console.error("Error creating the reservation:", error.message);
     res.status(500).json({ error: 'The reservation was saved but the email could not be sent' });
   }
-};
+};*/
 
 
 const getReserva = async (req, res) => {

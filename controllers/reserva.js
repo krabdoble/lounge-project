@@ -12,12 +12,10 @@ const createReserva = async (req, res) => {
   const user = req.user; // Información del usuario autenticado
 
   try {
-    // Asegúrate de que las fechas no se conviertan automáticamente a UTC
-    /*const inicio = moment(fechaInicio, 'YYYY-MM-DD HH:mm').toDate(); 
-    const fin = moment(fechaFin, 'YYYY-MM-DD HH:mm').toDate();*/
-    // Asegúrate de especificar la zona horaria correcta al procesar las fechas
-    const inicio = moment.tz(fechaInicio, "America/New_York").toDate(); // Reemplaza con tu zona horaria local
-    const fin = moment.tz(fechaFin, "America/New_York").toDate();
+    
+    // Asegúrate de convertir a UTC al guardar en la base de datos
+    const inicio = moment.tz(fechaInicio, "America/New_York").utc().format();
+    const fin = moment.tz(fechaFin, "America/New_York").utc().format();
 
     if (inicio >= fin) {
       return res.status(400).json({ error: 'The start date must be before the end date.' });
@@ -53,14 +51,15 @@ const createReserva = async (req, res) => {
     // Crear la reserva en la base de datos con las fechas en formato local
     const reserva = await Reserva.create({ usuarioId, salonId, fechaInicio: inicio, fechaFin: fin });
 
-    // Formatear las fechas para el correo y enviar
-    const fechaInicioFormatted = moment(inicio).format('YYYY-MM-DD HH:mm');
-    const fechaFinFormatted = moment(fin).format('YYYY-MM-DD HH:mm');
+    // Enviar correo con la hora correcta
+    const inicioLocal = moment.utc(reserva.fechaInicio).tz("America/New_York").format("YYYY-MM-DD HH:mm");
+    const finLocal = moment.utc(reserva.fechaFin).tz("America/New_York").format("YYYY-MM-DD HH:mm");
+
 
     await enviarCorreoConfirmacion(user.email, {
       ...reserva.dataValues, // Incluye los datos de la reserva
-      fechaInicio: fechaInicioFormatted, // Pasar las fechas formateadas
-      fechaFin: fechaFinFormatted,
+      fechaInicio: inicioLocal, // Pasar las fechas formateadas
+      fechaFin: finLocal,
       salonNombre: salon.nombre, // Agrega el nombre del salón
       usuarioNombre: user.displayName.split(" ")[0], // Agrega el nombre del usuario
     });

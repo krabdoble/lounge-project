@@ -1,4 +1,3 @@
-const moment = require('moment');
 const moment = require('moment-timezone');
 const Reserva = require('../models/reservaModel');
 const Usuario = require('../models/usuarioModel');

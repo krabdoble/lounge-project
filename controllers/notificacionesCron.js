@@ -62,22 +62,3 @@ cron.schedule('0 0 * * *', async () => {
     console.error('Error sending notifications:', error);
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-IMPORTAR ESO EN index.js
-require('./notificacionesCron');
-
-    lo que hay que instalar
-    npm install node-cron nodemailer
-*/
